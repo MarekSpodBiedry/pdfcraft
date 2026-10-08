@@ -58,3 +58,4 @@
 	Enable Acrobat JavaScript	Ativar o Acrobat JavaScript
 	OK	OK
 	Auto	Automático
+	Portable mode is off: {folder} can't be written ({error}). Settings are kept in your user folder instead.	O modo portátil está desativado: não é possível gravar em {folder} ({error}). As configurações ficam na sua pasta de usuário.
