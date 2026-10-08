@@ -42,9 +42,9 @@
 
       <Dialog Id="InstallProgress" Width="370" Height="180" Title="[ProductName] Setup" Modeless="yes">
         <Control Id="Title" Type="Text" X="20" Y="20" Width="330" Height="25" Text="{\InstallerTitle}Setting up [ProductName]" />
-        <Control Id="Status" Type="Text" X="20" Y="60" Width="330" Height="40" Text="Please wait while setup completes.">
-          <Subscribe Event="ActionText" Attribute="Text" />
-        </Control>
+        <!-- Static text, no ActionText subscription: the package has no ActionText table, so the
+             subscription replaced this with an empty string and setup looked stuck (#305). -->
+        <Control Id="Status" Type="Text" X="20" Y="60" Width="330" Height="40" Text="Please wait while setup completes." />
         <Control Id="Progress" Type="ProgressBar" X="20" Y="110" Width="330" Height="15" ProgressBlocks="yes">
           <Subscribe Event="SetProgress" Attribute="Progress" />
         </Control>

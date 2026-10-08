@@ -84,6 +84,15 @@ $title = Read-Row 'SELECT `Text` FROM `Control` WHERE `Dialog_` = ''InstallCompl
 if ($title[0] -notmatch 'completed successfully') { throw 'Success dialog does not confirm completion' }
 $rm = Read-Row 'SELECT `Dialog` FROM `Dialog` WHERE `Dialog` = ''MsiRMFilesInUse''' 1
 Assert-Equal $rm[0] 'MsiRMFilesInUse' 'Files-in-use dialog'
+# The progress text stays visible: no ActionText subscription may blank it (#305).
+$status = Read-Row 'SELECT `Text` FROM `Control` WHERE `Dialog_` = ''InstallProgress'' AND `Control` = ''Status''' 1
+if ($status[0] -notmatch 'Please wait') { throw "Progress status text: '$($status[0])'" }
+$view = $Database.OpenView('SELECT `Event` FROM `EventMapping` WHERE `Dialog_` = ''InstallProgress'' AND `Control_` = ''Status''')
+try {
+  [void] $view.Execute()
+  $subscription = $view.Fetch()
+  if ($subscription) { throw "Progress status text subscribes to $($subscription.StringData(1)), which replaces it" }
+} finally { [void] $view.Close() }
 [void] [Runtime.InteropServices.Marshal]::FinalReleaseComObject($Database)
 [void] [Runtime.InteropServices.Marshal]::FinalReleaseComObject($Installer)
-Write-Output 'ok MSI: Start Menu shortcut, optional desktop shortcut (default on, checkbox), icon/key path, full-UI success/cancel/error and Finish controls, files-in-use dialog'
+Write-Output 'ok MSI: Start Menu shortcut, optional desktop shortcut (default on, checkbox), icon/key path, full-UI success/cancel/error and Finish controls, files-in-use dialog, progress text'
