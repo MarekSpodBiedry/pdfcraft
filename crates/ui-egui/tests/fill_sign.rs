@@ -330,9 +330,15 @@ fn long_typed_names_fit_the_placed_signature_and_keep_every_outline() {
 }
 
 fn signature_file(test: &str) -> std::path::PathBuf {
+    signature_file_with_mark(test, 10..20)
+}
+
+/// A 120 x 40 signature: a stroke across the middle and a block above it at the columns `mark`
+/// (the rest is transparent), so a turned or flipped picture shows.
+fn signature_file_with_mark(test: &str, mark: std::ops::Range<u32>) -> std::path::PathBuf {
     let path = std::env::temp_dir().join(format!("pdfcraft-signature-{test}-{}.png", std::process::id()));
     let image = image::RgbaImage::from_fn(120, 40, |x, y| {
-        if (10..110).contains(&x) && (15..25).contains(&y) || (10..20).contains(&x) && (5..15).contains(&y) {
+        if (10..110).contains(&x) && (15..25).contains(&y) || mark.contains(&x) && (5..15).contains(&y) {
             image::Rgba([20, 30, 40, 255])
         } else {
             image::Rgba([0, 0, 0, 0])
@@ -414,7 +420,8 @@ fn image_signatures_and_initials_can_be_imported_placed_and_remembered() {
 
 #[test]
 fn image_signature_preview_follows_pointer_at_page_size_with_zoom_and_rotation() {
-    let path = signature_file("pointer");
+    // The block above the stroke is at its right end, away from the pointer's own cursor.
+    let path = signature_file_with_mark("pointer", 100..110);
     let image = pdfcraft_engine::SignatureImage::read(std::fs::File::open(&path).unwrap()).unwrap();
     let mut h = harness();
     // A link under the placement point must not replace the image with a hand cursor.
@@ -444,10 +451,13 @@ fn image_signature_preview_follows_pointer_at_page_size_with_zoom_and_rotation()
             h.hover_at(at(&h, 40.0, y));
             h.run_steps(2);
             assert_eq!(h.output().platform_output.cursor_icon, egui::CursorIcon::None, "the image replaces the crosshair");
+            // The picture is 96 x 32 pt with its left edge at the pointer: the stroke spans 8..88
+            // and the block above it 80..88. egui_kittest paints a mouse cursor, a 16 px triangle
+            // down and right of the pointer, over the render, so only probe far from the pointer.
             let ink = shown(&h, 40.0, y, 50.0, 0.0);
-            let margin = shown(&h, 40.0, y, 2.0, 0.0);
-            let upper_stroke = shown(&h, 40.0, y, 12.0, 8.0);
-            let lower_margin = shown(&h, 40.0, y, 12.0, -8.0);
+            let margin = shown(&h, 40.0, y, 92.0, 0.0);
+            let upper_stroke = shown(&h, 40.0, y, 84.0, 8.0);
+            let lower_margin = shown(&h, 40.0, y, 84.0, -8.0);
             let pixels = h.render().unwrap();
             assert!(pixels.get_pixel(ink.x as u32, ink.y as u32).0[..3].iter().all(|v| *v < 60), "ink follows the pointer at the placed size");
             assert!(pixels.get_pixel(margin.x as u32, margin.y as u32).0[..3].iter().all(|v| *v > 240), "alpha exposes the page");
