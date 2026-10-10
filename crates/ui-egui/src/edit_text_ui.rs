@@ -563,7 +563,7 @@ pub(crate) fn overlay(ctx: &egui::Context, view: &mut DocView, info: &DocInfo) -
 }
 
 /// Caret colour that stays visible on a field filled with `fill`: black on light fills, white on dark ones.
-fn caret_color_on(fill: Color32) -> Color32 {
+pub(crate) fn caret_color_on(fill: Color32) -> Color32 {
     let luma = 299 * u32::from(fill.r()) + 587 * u32::from(fill.g()) + 114 * u32::from(fill.b());
     if luma > 127_500 { Color32::BLACK } else { Color32::WHITE }
 }
@@ -575,6 +575,7 @@ mod caret_tests {
     #[test]
     fn caret_contrasts_with_its_fill() {
         assert_eq!(caret_color_on(Color32::WHITE), Color32::BLACK);
+        assert_eq!(caret_color_on(Color32::from_rgb(0xFF, 0xFF, 0xF4)), Color32::BLACK);
         assert_eq!(caret_color_on(Color32::BLACK), Color32::WHITE);
     }
 }
