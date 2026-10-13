@@ -386,7 +386,7 @@ mod tests {
 
     /// An app with a one-page document and a finished recognition run captured at that state.
     fn app_with_finished_run() -> Option<(PdfCraftApp, DocId)> {
-        let mut s = Session::new();
+        let s = Session::new();
         let bytes = s.create_from_text("t", "Some text").ok()?;
         let mut app = PdfCraftApp::new();
         app.open_bytes("t.pdf", None, bytes.to_vec()).ok()?;
