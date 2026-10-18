@@ -1456,7 +1456,7 @@ fn arrange(glyphs: &[TextGlyph]) -> (Vec<usize>, Vec<u32>, Vec<bool>) {
             let gap = g[0] - glyphs[p].rect[2];
             // A sub- or superscript is a smaller glyph on a shifted baseline: its em box centre sits off the line by
             // more than half its own height, but by less than half the height of the full-size glyph beside it.
-            let centre_limit = if gap < ph { height(p).max(height(i)) * 0.5 } else { ph * 0.5 };
+            let centre_limit = if gap.abs() < ph { height(p).max(height(i)) * 0.5 } else { ph * 0.5 };
             (cy(i) - cy(p)).abs() < centre_limit && gap < ph * 3.0 && g[0] > glyphs[p].rect[0] - ph * 2.0
         });
         let reset = cont && segs.last().is_some_and(|s| restarts_run(&glyphs, s.first.start, i, furthest_progress));
